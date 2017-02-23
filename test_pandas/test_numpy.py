@@ -10,6 +10,7 @@ import numpy as np
 import time
 import math
 
+
 a = np.array([1, 2, 3, 4])
 b = np.array((1, 2, 3, 4), dtype=np.float)
 c = np.array([[1, 2, 3, 4], [4, 5, 6, 7], [7, 8, 9, 10]])
@@ -208,4 +209,81 @@ def triangle_func(c, c0, hc):
     # 计算得到的是一个Object数组，需要进行类型转换
     return np.frompyfunc(trifunc, 1, 1)
 y2 = triangle_func(0.6, 0.4, 1.0)(x)
+
+
+# 广播
+a = np.arange(0, 60, 10).reshape(-1, 1)    # [[ 0], [10], [20], [30], [40], [50]]
+b = np.arange(0, 5)    # [0 1 2 3 4]
+print(a, '\n', b)
+print(a.shape, b.shape)    # 输出：(6, 1) (5,)
+print(a + b)
+
+b.shape = 1, 5
+print(b)
+b = b.repeat(6, axis=0)
+a = a.repeat(5, axis=1)
+print(a, b, sep='\n')
+print(a + b)
+
+x, y = np.ogrid[0:1:4j, 0:1:3j]
+print(x, y)
+
+a = np.add.reduce([1, 2, 3])  # 1 + 2 + 3
+b = np.add.reduce([[1, 2, 3], [4, 5, 6]], axis=0)  # 1+2+3 , 4+5+6
+c = np.add.reduce([[1, 2, 3], [4, 5, 6]], axis=1)  # 1+4 , 2+5 ,3+6
+print(a, b, c, sep='\n')
+
+
+a = np.add.accumulate([1, 2, 3])  # [1 3 6]
+b = np.add.accumulate([[1, 2, 3], [4, 5, 6]], axis=0)  # [[1 2 3],[5 7 9]]
+c = np.add.accumulate([[1, 2, 3], [4, 5, 6]], axis=1)  # [[ 1  3  6],[ 4  9 15]]
+print(a, b, c, sep='\n')
+
+
+a = np.array([1, 2, 3, 4])
+result = np.add.reduceat(a, indices=[0, 1, 0, 2, 0, 3, 0])
+print(result)
+
+
+x = np.multiply.outer([1, 2, 3, 4, 5], [2, 3, 4])
+print(x)   # [[ 2  3  4],[ 4  6  8],[ 6  9 12],[ 8 12 16],[10 15 20]]
+
+
+a = np.matrix([[1, 2, 3], [5, 5, 6], [7, 9, 9]])
+print(a*a**-1)
+
+
+a = np.arange(0, 12)
+a.shape = 3, 4
+print(a)
+a.tofile("a.bin")
+b = np.fromfile("a.bin", dtype=np.float)  # 按照float类型读入数据
+print(b)  # 读入的数据是错误的
+b = np.fromfile("a.bin", dtype=np.int32)  # 按照int32类型读入数据
+print(b)  # 数据是一维的
+b.shape = 3, 4  # 按照a的shape修改b的shape
+print(b)  # 这次终于正确了
+
+
+np.save("a.npy", a)
+c = np.load("a.npy")
+print(c)
+
+
+a = np.array([[1, 2, 3], [4, 5, 6]])
+b = np.arange(0, 1.0, 0.1)
+c = np.sin(b)
+np.savez("result.npz", a, b, sin_array=c)
+r = np.load("result.npz")
+print(r["arr_0"])  # 数组a
+print(r["arr_1"])  # 数组b
+print(r["sin_array"])  # 数组c
+
+
+a = np.arange(0, 12, 0.5).reshape(4, -1)
+np.savetxt("a.txt", a)  # 缺省按照'%.18e'格式保存数据，以空格分隔
+b = np.loadtxt("a.txt")
+np.savetxt("a.txt", a, fmt="%d", delimiter=",")  # 改为保存为整数，以逗号分隔
+c = np.loadtxt("a.txt", delimiter=",")  # 读入的时候也需要指定逗号分隔
+print(a, b, c, sep='\n')
 
